@@ -1,0 +1,26 @@
+{
+    "name": "mcp-server-validator",
+    "version": "0.1.0",
+    "description": "Validates MCP servers: connects, discovers capabilities, probes x402 payment support, measures latency, and builds structured snapshots with comprehensive error reporting.",
+    "main": "./src/index.mjs",
+    "type": "module",
+    "scripts": {
+        "test": "NODE_OPTIONS='--experimental-vm-modules' npx jest --detectOpenHandles",
+        "test:coverage:src": "NODE_OPTIONS='--experimental-vm-modules' npx jest --detectOpenHandles --coverage --collectCoverageFrom='src/**/*.mjs'",
+        "test:file": "NODE_OPTIONS='--experimental-vm-modules' npx jest --detectOpenHandles"
+    },
+    "keywords": [
+        "mcp",
+        "validator",
+        "x402",
+        "payment",
+        "server-validation"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.12.1"
+    },
+    "devDependencies": {
+        "jest": "^30.0.5"
+    }
+}

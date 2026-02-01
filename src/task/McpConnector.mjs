@@ -1,0 +1,259 @@
+import { Client } from '@modelcontextprotocol/sdk/client/index.js'
+import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
+
+
+class McpConnector {
+
+
+    static async connect( { mcpUrl, timeout } ) {
+        const messages = []
+
+        const { reachable } = await McpConnector.#checkReachable( { mcpUrl, timeout } )
+
+        if( !reachable ) {
+            messages.push( 'CON-001 mcpUrl: Server is not reachable' )
+
+            return { status: false, messages, client: null, serverInfo: null }
+        }
+
+        const { client, serverInfo, error } = await McpConnector.#initializeClient( { mcpUrl, timeout } )
+
+        if( error ) {
+            messages.push( `CON-004 mcp: Initialize handshake failed — ${error}` )
+
+            return { status: false, messages, client: null, serverInfo: null }
+        }
+
+        return { status: true, messages, client, serverInfo }
+    }
+
+
+    static async discover( { client } ) {
+        const messages = []
+
+        const { tools } = await McpConnector.#listTools( { client, messages } )
+        const { resources } = await McpConnector.#listResources( { client, messages } )
+        const { prompts } = await McpConnector.#listPrompts( { client, messages } )
+
+        const capabilities = McpConnector.#getCapabilities( { client } )
+
+        const status = true
+
+        return { status, messages, tools, resources, prompts, capabilities }
+    }
+
+
+    static async measureLatency( { client, tools } ) {
+        const { durationMs: ping } = await McpConnector.#measurePing( { client } )
+        const { durationMs: listTools } = await McpConnector.#measureListTools( { client } )
+
+        const latency = { ping, listTools }
+
+        return { latency }
+    }
+
+
+    static async disconnect( { client } ) {
+        if( !client ) {
+            return { disconnected: true }
+        }
+
+        try {
+            await client.close()
+        } catch( _e ) {
+            // Ignore disconnect errors
+        }
+
+        return { disconnected: true }
+    }
+
+
+    static #extractServerInfoFromClient( { client } ) {
+        try {
+            const version = client.getServerVersion()
+            const protocolVersion = client?.['_transport']?.['_protocolVersion'] || null
+            const instructions = client.getInstructions?.() || null
+
+            const serverInfo = {
+                serverInfo: {
+                    name: version?.['name'] || null,
+                    version: version?.['version'] || null,
+                    description: version?.['description'] || null
+                },
+                protocolVersion,
+                instructions
+            }
+
+            return serverInfo
+        } catch( _e ) {
+            return null
+        }
+    }
+
+
+    static #getCapabilities( { client } ) {
+        try {
+            const capabilities = client.getServerCapabilities() || {}
+
+            return capabilities
+        } catch( _e ) {
+            return {}
+        }
+    }
+
+
+    static async #checkReachable( { mcpUrl, timeout } ) {
+        const controller = new AbortController()
+        const timer = setTimeout( () => { controller.abort() }, timeout )
+
+        try {
+            await fetch( mcpUrl, {
+                method: 'HEAD',
+                signal: controller['signal']
+            } )
+
+            clearTimeout( timer )
+
+            return { reachable: true }
+        } catch( _e ) {
+            clearTimeout( timer )
+
+            return { reachable: false }
+        }
+    }
+
+
+    static async #initializeClient( { mcpUrl, timeout } ) {
+        const clientInfo = { name: 'mcp-server-validator', version: '0.1.0' }
+
+        const { client: streamClient, serverInfo: streamInfo, error: streamError } = await McpConnector.#tryStreamableHttp( { mcpUrl, timeout, clientInfo } )
+
+        if( !streamError ) {
+            return { client: streamClient, serverInfo: streamInfo, error: null }
+        }
+
+        const { client: sseClient, serverInfo: sseInfo, error: sseError } = await McpConnector.#trySSE( { mcpUrl, timeout, clientInfo } )
+
+        if( !sseError ) {
+            return { client: sseClient, serverInfo: sseInfo, error: null }
+        }
+
+        return { client: null, serverInfo: null, error: sseError }
+    }
+
+
+    static async #tryStreamableHttp( { mcpUrl, timeout, clientInfo } ) {
+        try {
+            const transport = new StreamableHTTPClientTransport( new URL( mcpUrl ) )
+            const client = new Client( clientInfo )
+
+            await client.connect( transport )
+
+            const serverInfo = McpConnector.#extractServerInfoFromClient( { client } )
+
+            return { client, serverInfo, error: null }
+        } catch( e ) {
+            const errorMsg = e['message'] || String( e )
+
+            return { client: null, serverInfo: null, error: errorMsg }
+        }
+    }
+
+
+    static async #trySSE( { mcpUrl, timeout, clientInfo } ) {
+        try {
+            const transport = new SSEClientTransport( new URL( mcpUrl ) )
+            const client = new Client( clientInfo )
+
+            await client.connect( transport )
+
+            const serverInfo = McpConnector.#extractServerInfoFromClient( { client } )
+
+            return { client, serverInfo, error: null }
+        } catch( e ) {
+            const errorMsg = e['message'] || String( e )
+
+            return { client: null, serverInfo: null, error: errorMsg }
+        }
+    }
+
+
+    static async #listTools( { client, messages } ) {
+        try {
+            const result = await client.listTools()
+            const tools = result['tools'] || []
+
+            if( !Array.isArray( tools ) ) {
+                messages.push( 'CON-009 tools/list: Invalid response format' )
+
+                return { tools: [] }
+            }
+
+            return { tools }
+        } catch( _e ) {
+            messages.push( 'CON-008 tools/list: Request failed' )
+
+            return { tools: [] }
+        }
+    }
+
+
+    static async #listResources( { client, messages } ) {
+        try {
+            const result = await client.listResources()
+            const resources = result['resources'] || []
+
+            return { resources }
+        } catch( _e ) {
+            messages.push( 'CON-010 resources/list: Request failed' )
+
+            return { resources: [] }
+        }
+    }
+
+
+    static async #listPrompts( { client, messages } ) {
+        try {
+            const result = await client.listPrompts()
+            const prompts = result['prompts'] || []
+
+            return { prompts }
+        } catch( _e ) {
+            messages.push( 'CON-011 prompts/list: Request failed' )
+
+            return { prompts: [] }
+        }
+    }
+
+
+    static async #measurePing( { client } ) {
+        try {
+            const start = performance.now()
+            await client.ping()
+            const end = performance.now()
+            const durationMs = Math.round( end - start )
+
+            return { durationMs }
+        } catch( _e ) {
+            return { durationMs: null }
+        }
+    }
+
+
+    static async #measureListTools( { client } ) {
+        try {
+            const start = performance.now()
+            await client.listTools()
+            const end = performance.now()
+            const durationMs = Math.round( end - start )
+
+            return { durationMs }
+        } catch( _e ) {
+            return { durationMs: null }
+        }
+    }
+}
+
+
+export { McpConnector }
