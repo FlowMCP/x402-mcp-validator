@@ -1,4 +1,4 @@
-[![Test](https://img.shields.io/github/actions/workflow/status/FlowMCP/x402-mcp-validator/test-on-release.yml)]() ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
+[![Test](https://img.shields.io/github/actions/workflow/status/FlowMCP/x402-mcp-validator/test-on-push.yml)]() ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)
 
 # x402-mcp-validator
 
