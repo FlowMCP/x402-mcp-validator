@@ -62,7 +62,7 @@ describe( 'McpConnector', () => {
             globalThis.fetch = jest.fn().mockRejectedValue( new Error( 'ECONNREFUSED' ) )
 
             const { status, messages, client } = await McpConnector
-                .connect( { mcpUrl: 'https://unreachable.example.com/mcp', timeout: 1000 } )
+                .connect( { endpoint: 'https://unreachable.example.com/mcp', timeout: 1000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'CON-001' )
@@ -78,7 +78,7 @@ describe( 'McpConnector', () => {
             mockConnect.mockResolvedValue( undefined )
 
             const { status, client, serverInfo } = await McpConnector
-                .connect( { mcpUrl: 'https://reachable.example.com/mcp', timeout: 5000 } )
+                .connect( { endpoint: 'https://reachable.example.com/mcp', timeout: 5000 } )
 
             expect( status ).toBe( true )
             expect( client ).toBeDefined()
@@ -97,7 +97,7 @@ describe( 'McpConnector', () => {
                 .mockResolvedValueOnce( undefined )
 
             const { status, client } = await McpConnector
-                .connect( { mcpUrl: 'https://sse-only.example.com/mcp', timeout: 5000 } )
+                .connect( { endpoint: 'https://sse-only.example.com/mcp', timeout: 5000 } )
 
             expect( status ).toBe( true )
             expect( client ).toBeDefined()
@@ -116,7 +116,7 @@ describe( 'McpConnector', () => {
                 .mockRejectedValueOnce( new Error( 'SSE failed' ) )
 
             const { status, messages, client } = await McpConnector
-                .connect( { mcpUrl: 'https://broken.example.com/mcp', timeout: 5000 } )
+                .connect( { endpoint: 'https://broken.example.com/mcp', timeout: 5000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'CON-004' )

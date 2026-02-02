@@ -9,20 +9,20 @@ import { X402Prober } from './task/X402Prober.mjs'
 class McpServerValidator {
 
 
-    static async start( { mcpUrl, timeout = 10000 } ) {
-        const { status: validationStatus, messages: validationMessages } = Validation.validationStart( { mcpUrl, timeout } )
+    static async start( { endpoint, timeout = 10000 } ) {
+        const { status: validationStatus, messages: validationMessages } = Validation.validationStart( { endpoint, timeout } )
         if( !validationStatus ) { Validation.error( { messages: validationMessages } ) }
 
-        const { status: connectStatus, messages: connectMessages, client, serverInfo } = await McpConnector.connect( { mcpUrl, timeout } )
+        const { status: connectStatus, messages: connectMessages, client, serverInfo } = await McpConnector.connect( { endpoint, timeout } )
 
         if( !connectStatus ) {
-            const { categories, entries } = SnapshotBuilder.buildEmpty( { mcpUrl } )
+            const { categories, entries } = SnapshotBuilder.buildEmpty( { endpoint } )
             const messages = [ ...connectMessages ]
 
             return { status: false, messages, categories, entries }
         }
 
-        const { messages, categories, entries } = await McpServerValidator.#runPipeline( { mcpUrl, client, serverInfo, timeout } )
+        const { messages, categories, entries } = await McpServerValidator.#runPipeline( { endpoint, client, serverInfo, timeout } )
 
         await McpConnector.disconnect( { client } )
 
@@ -65,7 +65,7 @@ class McpServerValidator {
     }
 
 
-    static async #runPipeline( { mcpUrl, client, serverInfo, timeout } ) {
+    static async #runPipeline( { endpoint, client, serverInfo, timeout } ) {
         const allMessages = []
 
         const { messages: discoverMessages, tools, resources, prompts, capabilities } = await McpConnector.discover( { client } )
@@ -82,7 +82,7 @@ class McpServerValidator {
         const { latency } = await McpConnector.measureLatency( { client, tools } )
 
         const { categories, entries } = SnapshotBuilder.build( {
-            mcpUrl,
+            endpoint,
             serverInfo,
             tools,
             resources,
@@ -100,8 +100,8 @@ class McpServerValidator {
 
 
     static #checkSnapshotIntegrity( { before, after, messages } ) {
-        const beforeUrl = before['entries']['mcpUrl']
-        const afterUrl = after['entries']['mcpUrl']
+        const beforeUrl = before['entries']['endpoint']
+        const afterUrl = after['entries']['endpoint']
 
         if( beforeUrl !== afterUrl ) {
             messages.push( 'CMP-001 compare: Snapshots are from different servers' )

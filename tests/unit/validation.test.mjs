@@ -6,34 +6,34 @@ describe( 'Validation', () => {
     describe( 'validationStart', () => {
         test( 'validates correct input', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'https://mcp.example.com/mcp', timeout: 10000 } )
+                .validationStart( { endpoint: 'https://mcp.example.com/mcp', timeout: 10000 } )
 
             expect( status ).toBe( true )
             expect( messages ).toHaveLength( 0 )
         } )
 
 
-        test( 'rejects missing mcpUrl', () => {
+        test( 'rejects missing endpoint', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: undefined, timeout: 10000 } )
+                .validationStart( { endpoint: undefined, timeout: 10000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-001' )
         } )
 
 
-        test( 'rejects non-string mcpUrl', () => {
+        test( 'rejects non-string endpoint', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 123, timeout: 10000 } )
+                .validationStart( { endpoint: 123, timeout: 10000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-002' )
         } )
 
 
-        test( 'rejects empty mcpUrl', () => {
+        test( 'rejects empty endpoint', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: '   ', timeout: 10000 } )
+                .validationStart( { endpoint: '   ', timeout: 10000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-003' )
@@ -42,7 +42,7 @@ describe( 'Validation', () => {
 
         test( 'rejects invalid URL', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'not-a-url', timeout: 10000 } )
+                .validationStart( { endpoint: 'not-a-url', timeout: 10000 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-004' )
@@ -51,7 +51,7 @@ describe( 'Validation', () => {
 
         test( 'rejects non-number timeout', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'https://mcp.example.com/mcp', timeout: 'fast' } )
+                .validationStart( { endpoint: 'https://mcp.example.com/mcp', timeout: 'fast' } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-005' )
@@ -60,7 +60,7 @@ describe( 'Validation', () => {
 
         test( 'rejects zero timeout', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'https://mcp.example.com/mcp', timeout: 0 } )
+                .validationStart( { endpoint: 'https://mcp.example.com/mcp', timeout: 0 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-006' )
@@ -69,7 +69,7 @@ describe( 'Validation', () => {
 
         test( 'rejects negative timeout', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'https://mcp.example.com/mcp', timeout: -5 } )
+                .validationStart( { endpoint: 'https://mcp.example.com/mcp', timeout: -5 } )
 
             expect( status ).toBe( false )
             expect( messages[ 0 ] ).toContain( 'VAL-006' )
@@ -78,7 +78,7 @@ describe( 'Validation', () => {
 
         test( 'accepts undefined timeout as optional', () => {
             const { status, messages } = Validation
-                .validationStart( { mcpUrl: 'https://mcp.example.com/mcp', timeout: undefined } )
+                .validationStart( { endpoint: 'https://mcp.example.com/mcp', timeout: undefined } )
 
             expect( status ).toBe( true )
             expect( messages ).toHaveLength( 0 )
@@ -89,7 +89,7 @@ describe( 'Validation', () => {
     describe( 'validationCompare', () => {
         const validSnapshot = {
             categories: { isReachable: true },
-            entries: { mcpUrl: 'https://example.com' }
+            entries: { endpoint: 'https://example.com' }
         }
 
 

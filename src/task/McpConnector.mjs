@@ -6,18 +6,18 @@ import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js'
 class McpConnector {
 
 
-    static async connect( { mcpUrl, timeout } ) {
+    static async connect( { endpoint, timeout } ) {
         const messages = []
 
-        const { reachable } = await McpConnector.#checkReachable( { mcpUrl, timeout } )
+        const { reachable } = await McpConnector.#checkReachable( { endpoint, timeout } )
 
         if( !reachable ) {
-            messages.push( 'CON-001 mcpUrl: Server is not reachable' )
+            messages.push( 'CON-001 endpoint: Server is not reachable' )
 
             return { status: false, messages, client: null, serverInfo: null }
         }
 
-        const { client, serverInfo, error } = await McpConnector.#initializeClient( { mcpUrl, timeout } )
+        const { client, serverInfo, error } = await McpConnector.#initializeClient( { endpoint, timeout } )
 
         if( error ) {
             messages.push( `CON-004 mcp: Initialize handshake failed — ${error}` )
@@ -103,12 +103,12 @@ class McpConnector {
     }
 
 
-    static async #checkReachable( { mcpUrl, timeout } ) {
+    static async #checkReachable( { endpoint, timeout } ) {
         const controller = new AbortController()
         const timer = setTimeout( () => { controller.abort() }, timeout )
 
         try {
-            await fetch( mcpUrl, {
+            await fetch( endpoint, {
                 method: 'HEAD',
                 signal: controller['signal']
             } )
@@ -124,16 +124,16 @@ class McpConnector {
     }
 
 
-    static async #initializeClient( { mcpUrl, timeout } ) {
+    static async #initializeClient( { endpoint, timeout } ) {
         const clientInfo = { name: 'mcp-server-validator', version: '0.1.0' }
 
-        const { client: streamClient, serverInfo: streamInfo, error: streamError } = await McpConnector.#tryStreamableHttp( { mcpUrl, timeout, clientInfo } )
+        const { client: streamClient, serverInfo: streamInfo, error: streamError } = await McpConnector.#tryStreamableHttp( { endpoint, timeout, clientInfo } )
 
         if( !streamError ) {
             return { client: streamClient, serverInfo: streamInfo, error: null }
         }
 
-        const { client: sseClient, serverInfo: sseInfo, error: sseError } = await McpConnector.#trySSE( { mcpUrl, timeout, clientInfo } )
+        const { client: sseClient, serverInfo: sseInfo, error: sseError } = await McpConnector.#trySSE( { endpoint, timeout, clientInfo } )
 
         if( !sseError ) {
             return { client: sseClient, serverInfo: sseInfo, error: null }
@@ -143,9 +143,9 @@ class McpConnector {
     }
 
 
-    static async #tryStreamableHttp( { mcpUrl, timeout, clientInfo } ) {
+    static async #tryStreamableHttp( { endpoint, timeout, clientInfo } ) {
         try {
-            const transport = new StreamableHTTPClientTransport( new URL( mcpUrl ) )
+            const transport = new StreamableHTTPClientTransport( new URL( endpoint ) )
             const client = new Client( clientInfo )
 
             await client.connect( transport )
@@ -161,9 +161,9 @@ class McpConnector {
     }
 
 
-    static async #trySSE( { mcpUrl, timeout, clientInfo } ) {
+    static async #trySSE( { endpoint, timeout, clientInfo } ) {
         try {
-            const transport = new SSEClientTransport( new URL( mcpUrl ) )
+            const transport = new SSEClientTransport( new URL( endpoint ) )
             const client = new Client( clientInfo )
 
             await client.connect( transport )

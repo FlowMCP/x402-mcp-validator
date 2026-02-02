@@ -16,7 +16,7 @@ npm i
 import { McpServerValidator } from 'x402-mcp-validator'
 
 const { status, messages, categories, entries } = await McpServerValidator.start( {
-    mcpUrl: 'https://your-mcp-server.example.com/mcp',
+    endpoint: 'https://your-mcp-server.example.com/mcp',
     timeout: 15000
 } )
 ```
@@ -38,7 +38,7 @@ The validation pipeline processes an MCP server in six sequential steps:
 
 ```mermaid
 flowchart LR
-    A[mcpUrl] --> B[McpConnector.connect]
+    A[endpoint] --> B[McpConnector.connect]
     B --> C[McpConnector.discover]
     C --> D[CapabilityClassifier.classify]
     D --> E[X402Prober.probe]
@@ -66,12 +66,12 @@ Connects to an MCP server, discovers capabilities, probes for x402 payment suppo
 **Method**
 
 ```
-.start( { mcpUrl, timeout } )
+.start( { endpoint, timeout } )
 ```
 
 | Key | Type | Description | Required |
 |-----|------|-------------|----------|
-| mcpUrl | string | URL of the MCP server. Example `'https://server.example.com/mcp'` | Yes |
+| endpoint | string | URL of the MCP server. Example `'https://server.example.com/mcp'` | Yes |
 | timeout | number | Connection timeout in milliseconds. Default `10000` | No |
 
 **Example**
@@ -80,7 +80,7 @@ Connects to an MCP server, discovers capabilities, probes for x402 payment suppo
 import { McpServerValidator } from 'x402-mcp-validator'
 
 const { status, messages, categories, entries } = await McpServerValidator.start( {
-    mcpUrl: 'https://your-mcp-server.example.com/mcp',
+    endpoint: 'https://your-mcp-server.example.com/mcp',
     timeout: 15000
 } )
 
@@ -125,8 +125,8 @@ Compares two snapshots produced by `.start()` and returns a structured diff with
 ```javascript
 import { McpServerValidator } from 'x402-mcp-validator'
 
-const before = await McpServerValidator.start( { mcpUrl: 'https://server.example.com/mcp' } )
-const after = await McpServerValidator.start( { mcpUrl: 'https://server.example.com/mcp' } )
+const before = await McpServerValidator.start( { endpoint: 'https://server.example.com/mcp' } )
+const after = await McpServerValidator.start( { endpoint: 'https://server.example.com/mcp' } )
 
 const { status, messages, hasChanges, diff } = McpServerValidator.compare( { before, after } )
 
@@ -173,7 +173,7 @@ console.log( `Tools removed: ${diff['tools']['removed'].length}` )
 
 | Key | Type | Description |
 |-----|------|-------------|
-| mcpUrl | string | Server URL that was validated |
+| endpoint | string | MCP server endpoint URL that was validated |
 | serverName | string | Server name from MCP handshake |
 | serverVersion | string | Server version |
 | serverDescription | string | Server description |

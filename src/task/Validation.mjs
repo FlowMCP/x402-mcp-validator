@@ -1,20 +1,20 @@
 class Validation {
 
 
-    static validationStart( { mcpUrl, timeout } ) {
+    static validationStart( { endpoint, timeout } ) {
         const struct = { status: false, messages: [] }
 
-        if( mcpUrl === undefined ) {
-            struct['messages'].push( 'VAL-001 mcpUrl: Missing value' )
-        } else if( typeof mcpUrl !== 'string' ) {
-            struct['messages'].push( 'VAL-002 mcpUrl: Must be a string' )
-        } else if( mcpUrl.trim() === '' ) {
-            struct['messages'].push( 'VAL-003 mcpUrl: Must not be empty' )
+        if( endpoint === undefined ) {
+            struct['messages'].push( 'VAL-001 endpoint: Missing value' )
+        } else if( typeof endpoint !== 'string' ) {
+            struct['messages'].push( 'VAL-002 endpoint: Must be a string' )
+        } else if( endpoint.trim() === '' ) {
+            struct['messages'].push( 'VAL-003 endpoint: Must not be empty' )
         } else {
             try {
-                new URL( mcpUrl )
+                new URL( endpoint )
             } catch( _e ) {
-                struct['messages'].push( 'VAL-004 mcpUrl: Must be a valid URL' )
+                struct['messages'].push( 'VAL-004 endpoint: Must be a valid URL' )
             }
         }
 

@@ -258,7 +258,7 @@ const EXPECTED_CATEGORY_KEYS = [
 // --- Expected Entry Keys (13) ---
 
 const EXPECTED_ENTRY_KEYS = [
-    'mcpUrl',
+    'endpoint',
     'serverName',
     'serverVersion',
     'serverDescription',
@@ -318,9 +318,9 @@ const MOCK_LATENCY = {
 }
 
 
-// --- Test MCP URL ---
+// --- Test Endpoint ---
 
-const TEST_MCP_URL = 'https://mcp.example.com/mcp'
+const TEST_ENDPOINT = 'https://mcp.example.com/mcp'
 
 
 export {
@@ -348,5 +348,5 @@ export {
     FULL_VALID_CATEGORIES,
     EMPTY_CATEGORIES,
     MOCK_LATENCY,
-    TEST_MCP_URL
+    TEST_ENDPOINT
 }

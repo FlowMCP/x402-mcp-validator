@@ -8,7 +8,7 @@ const runStart = async () => {
     console.log( `\n  Validating MCP Server: ${MCP_URL}\n` )
 
     try {
-        const { status, messages, categories, entries } = await McpServerValidator.start( { mcpUrl: MCP_URL, timeout: 15000 } )
+        const { status, messages, categories, entries } = await McpServerValidator.start( { endpoint: MCP_URL, timeout: 15000 } )
 
         console.log( `  Status: ${status ? 'PASS' : 'FAIL'}` )
         console.log( `  Messages: ${messages.length === 0 ? 'none' : ''}` )

@@ -11,7 +11,7 @@ import {
     EXPECTED_CATEGORY_KEYS,
     EXPECTED_ENTRY_KEYS,
     EMPTY_CATEGORIES,
-    TEST_MCP_URL
+    TEST_ENDPOINT
 } from '../../helpers/config.mjs'
 
 
@@ -55,38 +55,38 @@ describe( 'McpServerValidator.start', () => {
 
     describe( 'Parameter Validation', () => {
 
-        test( 'throws when mcpUrl is missing', async () => {
+        test( 'throws when endpoint is missing', async () => {
             await expect( McpServerValidator.start( {} ) ).rejects.toThrow( 'VAL-001' )
         } )
 
 
-        test( 'throws when mcpUrl is not a string', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: 42 } ) ).rejects.toThrow( 'VAL-002' )
+        test( 'throws when endpoint is not a string', async () => {
+            await expect( McpServerValidator.start( { endpoint: 42 } ) ).rejects.toThrow( 'VAL-002' )
         } )
 
 
-        test( 'throws when mcpUrl is empty', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: '  ' } ) ).rejects.toThrow( 'VAL-003' )
+        test( 'throws when endpoint is empty', async () => {
+            await expect( McpServerValidator.start( { endpoint: '  ' } ) ).rejects.toThrow( 'VAL-003' )
         } )
 
 
-        test( 'throws when mcpUrl is invalid URL', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: 'not-a-url' } ) ).rejects.toThrow( 'VAL-004' )
+        test( 'throws when endpoint is invalid URL', async () => {
+            await expect( McpServerValidator.start( { endpoint: 'not-a-url' } ) ).rejects.toThrow( 'VAL-004' )
         } )
 
 
         test( 'throws when timeout is not a number', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: TEST_MCP_URL, timeout: 'fast' } ) ).rejects.toThrow( 'VAL-005' )
+            await expect( McpServerValidator.start( { endpoint: TEST_ENDPOINT, timeout: 'fast' } ) ).rejects.toThrow( 'VAL-005' )
         } )
 
 
         test( 'throws when timeout is zero', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: TEST_MCP_URL, timeout: 0 } ) ).rejects.toThrow( 'VAL-006' )
+            await expect( McpServerValidator.start( { endpoint: TEST_ENDPOINT, timeout: 0 } ) ).rejects.toThrow( 'VAL-006' )
         } )
 
 
         test( 'throws when timeout is negative', async () => {
-            await expect( McpServerValidator.start( { mcpUrl: TEST_MCP_URL, timeout: -1 } ) ).rejects.toThrow( 'VAL-006' )
+            await expect( McpServerValidator.start( { endpoint: TEST_ENDPOINT, timeout: -1 } ) ).rejects.toThrow( 'VAL-006' )
         } )
     } )
 
@@ -96,12 +96,12 @@ describe( 'McpServerValidator.start', () => {
         test( 'returns empty categories when server is not reachable', async () => {
             mockConnector['connect'].mockResolvedValue( {
                 status: false,
-                messages: [ 'CON-001 mcpUrl: Server is not reachable' ],
+                messages: [ 'CON-001 endpoint: Server is not reachable' ],
                 client: null,
                 serverInfo: null
             } )
 
-            const { status, messages, categories, entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { status, messages, categories, entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( status ).toBe( false )
             expect( messages ).toContainEqual( expect.stringContaining( 'CON-001' ) )
@@ -111,7 +111,7 @@ describe( 'McpServerValidator.start', () => {
                     expect( categories[key] ).toBe( false )
                 } )
 
-            expect( entries['mcpUrl'] ).toBe( TEST_MCP_URL )
+            expect( entries['endpoint'] ).toBe( TEST_ENDPOINT )
             expect( entries['serverName'] ).toBeNull()
             expect( entries['tools'] ).toEqual( [] )
         } )
@@ -148,7 +148,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'returns all 12 category keys', async () => {
-            const { categories } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const categoryKeys = Object.keys( categories )
 
@@ -162,7 +162,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'returns all 13 entry keys', async () => {
-            const { entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const entryKeys = Object.keys( entries )
 
@@ -176,7 +176,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'sets isReachable and supportsMcp to true', async () => {
-            const { categories } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( categories['isReachable'] ).toBe( true )
             expect( categories['supportsMcp'] ).toBe( true )
@@ -184,7 +184,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'classifies tools, resources, prompts correctly', async () => {
-            const { categories } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( categories['hasTools'] ).toBe( true )
             expect( categories['hasResources'] ).toBe( true )
@@ -193,7 +193,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'extracts server info into entries', async () => {
-            const { entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( entries['serverName'] ).toBe( 'test-mcp-server' )
             expect( entries['serverVersion'] ).toBe( '1.0.0' )
@@ -202,7 +202,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'includes latency in entries', async () => {
-            const { entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( entries['latency']['ping'] ).toBe( 120 )
             expect( entries['latency']['listTools'] ).toBe( 250 )
@@ -210,7 +210,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'includes timestamp in entries', async () => {
-            const { entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( entries['timestamp'] ).toBeDefined()
             expect( typeof entries['timestamp'] ).toBe( 'string' )
@@ -218,7 +218,7 @@ describe( 'McpServerValidator.start', () => {
 
 
         test( 'calls disconnect after pipeline', async () => {
-            await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( mockConnector['disconnect'] ).toHaveBeenCalledTimes( 1 )
         } )
@@ -259,7 +259,7 @@ describe( 'McpServerValidator.start', () => {
                 .mockRejectedValueOnce( { code: -32402, data: VALID_PAYMENT_REQUIRED } )
                 .mockRejectedValueOnce( { code: -32402, data: VALID_PAYMENT_REQUIRED } )
 
-            const { categories, entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories, entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( categories['supportsX402'] ).toBe( true )
             expect( entries['x402']['restrictedCalls'].length ).toBeGreaterThan( 0 )
@@ -271,7 +271,7 @@ describe( 'McpServerValidator.start', () => {
                 .mockRejectedValueOnce( { code: -32402, data: VALID_PAYMENT_REQUIRED } )
                 .mockResolvedValueOnce( {} )
 
-            const { categories, entries } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories, entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( categories['supportsX402'] ).toBe( true )
             expect( categories['hasValidPaymentRequirements'] ).toBe( true )
@@ -283,7 +283,7 @@ describe( 'McpServerValidator.start', () => {
         test( 'sets supportsX402 false when no 402 errors', async () => {
             mockClient['callTool'].mockResolvedValue( {} )
 
-            const { categories } = await McpServerValidator.start( { mcpUrl: TEST_MCP_URL } )
+            const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             expect( categories['supportsX402'] ).toBe( false )
             expect( categories['hasValidPaymentRequirements'] ).toBe( false )

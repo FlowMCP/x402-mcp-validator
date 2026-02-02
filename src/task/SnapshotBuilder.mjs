@@ -17,19 +17,19 @@ const EMPTY_CATEGORIES = {
 class SnapshotBuilder {
 
 
-    static build( { mcpUrl, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
+    static build( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
         const { categories } = SnapshotBuilder.#buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions } )
-        const { entries } = SnapshotBuilder.#buildEntries( { mcpUrl, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } )
+        const { entries } = SnapshotBuilder.#buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } )
 
         return { categories, entries }
     }
 
 
-    static buildEmpty( { mcpUrl } ) {
+    static buildEmpty( { endpoint } ) {
         const categories = { ...EMPTY_CATEGORIES }
 
         const entries = {
-            mcpUrl,
+            endpoint,
             serverName: null,
             serverVersion: null,
             serverDescription: null,
@@ -84,7 +84,7 @@ class SnapshotBuilder {
     }
 
 
-    static #buildEntries( { mcpUrl, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
+    static #buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
         const { serverName, serverVersion, serverDescription, protocolVersion, instructions } = SnapshotBuilder.#extractServerInfo( { serverInfo } )
         const { networks } = SnapshotBuilder.#extractUniqueNetworks( { paymentOptions: validPaymentOptions } )
         const { schemes } = SnapshotBuilder.#extractUniqueSchemes( { paymentOptions: validPaymentOptions } )
@@ -93,7 +93,7 @@ class SnapshotBuilder {
         const version = restrictedCalls.length > 0 ? 2 : null
 
         const entries = {
-            mcpUrl,
+            endpoint,
             serverName,
             serverVersion,
             serverDescription,

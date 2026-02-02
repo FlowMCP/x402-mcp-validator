@@ -9,7 +9,7 @@ import {
     MOCK_RESTRICTED_CALLS,
     VALID_PAYMENT_OPTIONS,
     MOCK_LATENCY,
-    TEST_MCP_URL,
+    TEST_ENDPOINT,
     EXPECTED_CATEGORY_KEYS,
     EXPECTED_ENTRY_KEYS
 } from '../helpers/config.mjs'
@@ -17,7 +17,7 @@ import {
 
 describe( 'SnapshotBuilder', () => {
     const buildArgs = {
-        mcpUrl: TEST_MCP_URL,
+        endpoint: TEST_ENDPOINT,
         serverInfo: MOCK_SERVER_INFO,
         tools: MOCK_TOOLS,
         resources: MOCK_RESOURCES,
@@ -125,7 +125,7 @@ describe( 'SnapshotBuilder', () => {
 
     describe( 'buildEmpty', () => {
         test( 'returns all categories as false', () => {
-            const { categories } = SnapshotBuilder.buildEmpty( { mcpUrl: TEST_MCP_URL } )
+            const { categories } = SnapshotBuilder.buildEmpty( { endpoint: TEST_ENDPOINT } )
 
             EXPECTED_CATEGORY_KEYS
                 .forEach( ( key ) => {
@@ -134,10 +134,10 @@ describe( 'SnapshotBuilder', () => {
         } )
 
 
-        test( 'returns empty entries with mcpUrl', () => {
-            const { entries } = SnapshotBuilder.buildEmpty( { mcpUrl: TEST_MCP_URL } )
+        test( 'returns empty entries with endpoint', () => {
+            const { entries } = SnapshotBuilder.buildEmpty( { endpoint: TEST_ENDPOINT } )
 
-            expect( entries.mcpUrl ).toBe( TEST_MCP_URL )
+            expect( entries.endpoint ).toBe( TEST_ENDPOINT )
             expect( entries.serverName ).toBeNull()
             expect( entries.tools ).toEqual( [] )
             expect( entries.x402.restrictedCalls ).toEqual( [] )

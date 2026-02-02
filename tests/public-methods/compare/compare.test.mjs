@@ -10,7 +10,7 @@ import {
     VALID_PAYMENT_REQUIRED,
     VALID_PAYMENT_OPTIONS,
     MOCK_LATENCY,
-    TEST_MCP_URL,
+    TEST_ENDPOINT,
     EXPECTED_CATEGORY_KEYS
 } from '../../helpers/config.mjs'
 
@@ -36,7 +36,7 @@ const MOCK_PER_TOOL = {
 }
 
 const buildBaseEntries = () => ( {
-    mcpUrl: TEST_MCP_URL,
+    endpoint: TEST_ENDPOINT,
     serverName: 'test-mcp-server',
     serverVersion: '1.0.0',
     serverDescription: 'A test MCP server',
@@ -314,7 +314,7 @@ describe( 'McpServerValidator.compare', () => {
             const after = buildSnapshot( {
                 entriesOverride: {
                     ...buildBaseEntries(),
-                    mcpUrl: 'https://other-server.com/mcp'
+                    endpoint: 'https://other-server.com/mcp'
                 }
             } )
 
