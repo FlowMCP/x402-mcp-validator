@@ -237,7 +237,7 @@ const VALID_PAYMENT_OPTIONS_MULTI = [
 ]
 
 
-// --- Expected Category Keys (12) ---
+// --- Expected Category Keys (18) ---
 
 const EXPECTED_CATEGORY_KEYS = [
     'isReachable',
@@ -251,11 +251,17 @@ const EXPECTED_CATEGORY_KEYS = [
     'supportsEvm',
     'supportsSolana',
     'supportsTasks',
-    'supportsMcpApps'
+    'supportsMcpApps',
+    'supportsOAuth',
+    'hasProtectedResourceMetadata',
+    'hasAuthServerMetadata',
+    'supportsPkce',
+    'hasDynamicRegistration',
+    'hasValidOAuthConfig'
 ]
 
 
-// --- Expected Entry Keys (13) ---
+// --- Expected Entry Keys (14) ---
 
 const EXPECTED_ENTRY_KEYS = [
     'endpoint',
@@ -269,6 +275,7 @@ const EXPECTED_ENTRY_KEYS = [
     'resources',
     'prompts',
     'x402',
+    'oauth',
     'latency',
     'timestamp'
 ]
@@ -288,7 +295,13 @@ const FULL_VALID_CATEGORIES = {
     supportsEvm: true,
     supportsSolana: false,
     supportsTasks: false,
-    supportsMcpApps: false
+    supportsMcpApps: false,
+    supportsOAuth: false,
+    hasProtectedResourceMetadata: false,
+    hasAuthServerMetadata: false,
+    supportsPkce: false,
+    hasDynamicRegistration: false,
+    hasValidOAuthConfig: false
 }
 
 
@@ -306,7 +319,46 @@ const EMPTY_CATEGORIES = {
     supportsEvm: false,
     supportsSolana: false,
     supportsTasks: false,
-    supportsMcpApps: false
+    supportsMcpApps: false,
+    supportsOAuth: false,
+    hasProtectedResourceMetadata: false,
+    hasAuthServerMetadata: false,
+    supportsPkce: false,
+    hasDynamicRegistration: false,
+    hasValidOAuthConfig: false
+}
+
+
+// --- Mock OAuth Entries ---
+
+const MOCK_OAUTH_ENTRIES_EMPTY = {
+    issuer: null,
+    authorizationEndpoint: null,
+    tokenEndpoint: null,
+    registrationEndpoint: null,
+    revocationEndpoint: null,
+    scopesSupported: [],
+    grantTypesSupported: [],
+    responseTypesSupported: [],
+    pkceMethodsSupported: [],
+    clientIdMetadataDocumentSupported: false,
+    protectedResourceMetadataUrl: null,
+    mcpVersion: null
+}
+
+const MOCK_OAUTH_ENTRIES_FULL = {
+    issuer: 'https://auth.example.com',
+    authorizationEndpoint: 'https://auth.example.com/oauth/authorize',
+    tokenEndpoint: 'https://auth.example.com/oauth/token',
+    registrationEndpoint: 'https://auth.example.com/oauth/register',
+    revocationEndpoint: 'https://auth.example.com/oauth/revoke',
+    scopesSupported: [ 'mcp:tools', 'mcp:resources' ],
+    grantTypesSupported: [ 'authorization_code', 'refresh_token' ],
+    responseTypesSupported: [ 'code' ],
+    pkceMethodsSupported: [ 'S256' ],
+    clientIdMetadataDocumentSupported: true,
+    protectedResourceMetadataUrl: 'https://mcp.example.com/.well-known/oauth-protected-resource/mcp',
+    mcpVersion: '2025-11-25'
 }
 
 
@@ -347,6 +399,8 @@ export {
     EXPECTED_ENTRY_KEYS,
     FULL_VALID_CATEGORIES,
     EMPTY_CATEGORIES,
+    MOCK_OAUTH_ENTRIES_EMPTY,
+    MOCK_OAUTH_ENTRIES_FULL,
     MOCK_LATENCY,
     TEST_ENDPOINT
 }

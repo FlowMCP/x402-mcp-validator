@@ -8,6 +8,8 @@ import {
     MOCK_CAPABILITIES,
     MOCK_RESTRICTED_CALLS,
     VALID_PAYMENT_OPTIONS,
+    MOCK_OAUTH_ENTRIES_EMPTY,
+    MOCK_OAUTH_ENTRIES_FULL,
     MOCK_LATENCY,
     TEST_ENDPOINT,
     EXPECTED_CATEGORY_KEYS,
@@ -33,12 +35,14 @@ describe( 'SnapshotBuilder', () => {
         restrictedCalls: MOCK_RESTRICTED_CALLS,
         paymentOptions: VALID_PAYMENT_OPTIONS,
         validPaymentOptions: VALID_PAYMENT_OPTIONS,
-        latency: MOCK_LATENCY
+        latency: MOCK_LATENCY,
+        oauthEntries: MOCK_OAUTH_ENTRIES_EMPTY,
+        supportsOAuth: false
     }
 
 
     describe( 'build', () => {
-        test( 'returns all 12 category keys', () => {
+        test( 'returns all 18 category keys', () => {
             const { categories } = SnapshotBuilder.build( buildArgs )
 
             EXPECTED_CATEGORY_KEYS
@@ -48,7 +52,7 @@ describe( 'SnapshotBuilder', () => {
         } )
 
 
-        test( 'returns all 13 entry keys', () => {
+        test( 'returns all 14 entry keys', () => {
             const { entries } = SnapshotBuilder.build( buildArgs )
 
             EXPECTED_ENTRY_KEYS
@@ -120,6 +124,40 @@ describe( 'SnapshotBuilder', () => {
             expect( entries.timestamp ).toBeDefined()
             expect( typeof entries.timestamp ).toBe( 'string' )
         } )
+
+
+        test( 'includes oauth entries', () => {
+            const { entries } = SnapshotBuilder.build( buildArgs )
+
+            expect( entries ).toHaveProperty( 'oauth' )
+            expect( entries['oauth']['issuer'] ).toBeNull()
+        } )
+
+
+        test( 'sets OAuth categories to false when no OAuth', () => {
+            const { categories } = SnapshotBuilder.build( buildArgs )
+
+            expect( categories['supportsOAuth'] ).toBe( false )
+            expect( categories['hasValidOAuthConfig'] ).toBe( false )
+        } )
+
+
+        test( 'sets OAuth categories when OAuth is present', () => {
+            const argsWithOAuth = {
+                ...buildArgs,
+                oauthEntries: MOCK_OAUTH_ENTRIES_FULL,
+                supportsOAuth: true
+            }
+
+            const { categories } = SnapshotBuilder.build( argsWithOAuth )
+
+            expect( categories['supportsOAuth'] ).toBe( true )
+            expect( categories['hasProtectedResourceMetadata'] ).toBe( true )
+            expect( categories['hasAuthServerMetadata'] ).toBe( true )
+            expect( categories['supportsPkce'] ).toBe( true )
+            expect( categories['hasDynamicRegistration'] ).toBe( true )
+            expect( categories['hasValidOAuthConfig'] ).toBe( true )
+        } )
     } )
 
 
@@ -141,6 +179,7 @@ describe( 'SnapshotBuilder', () => {
             expect( entries.serverName ).toBeNull()
             expect( entries.tools ).toEqual( [] )
             expect( entries.x402.restrictedCalls ).toEqual( [] )
+            expect( entries.oauth.issuer ).toBeNull()
         } )
     } )
 } )

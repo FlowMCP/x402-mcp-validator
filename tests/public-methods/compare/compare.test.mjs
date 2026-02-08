@@ -9,6 +9,7 @@ import {
     MOCK_CAPABILITIES,
     VALID_PAYMENT_REQUIRED,
     VALID_PAYMENT_OPTIONS,
+    MOCK_OAUTH_ENTRIES_EMPTY,
     MOCK_LATENCY,
     TEST_ENDPOINT,
     EXPECTED_CATEGORY_KEYS
@@ -54,6 +55,7 @@ const buildBaseEntries = () => ( {
         schemes: [ 'exact' ],
         perTool: { ...MOCK_PER_TOOL }
     },
+    oauth: { ...MOCK_OAUTH_ENTRIES_EMPTY },
     latency: { ...MOCK_LATENCY },
     timestamp: '2025-06-01T12:00:00.000Z'
 } )

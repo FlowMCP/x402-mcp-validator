@@ -1,5 +1,6 @@
 import { CapabilityClassifier } from './task/CapabilityClassifier.mjs'
 import { McpConnector } from './task/McpConnector.mjs'
+import { OAuthProber } from './task/OAuthProber.mjs'
 import { PaymentValidator } from './task/PaymentValidator.mjs'
 import { SnapshotBuilder } from './task/SnapshotBuilder.mjs'
 import { Validation } from './task/Validation.mjs'
@@ -13,20 +14,22 @@ class McpServerValidator {
         const { status: validationStatus, messages: validationMessages } = Validation.validationStart( { endpoint, timeout } )
         if( !validationStatus ) { Validation.error( { messages: validationMessages } ) }
 
+        const { messages: oauthMessages, supportsOAuth, oauthEntries } = await OAuthProber.probe( { endpoint, timeout } )
+
         const { status: connectStatus, messages: connectMessages, client, serverInfo } = await McpConnector.connect( { endpoint, timeout } )
 
         if( !connectStatus ) {
-            const { categories, entries } = SnapshotBuilder.buildEmpty( { endpoint } )
-            const messages = [ ...connectMessages ]
+            const { categories, entries } = SnapshotBuilder.buildEmpty( { endpoint, oauthEntries, supportsOAuth } )
+            const messages = [ ...connectMessages, ...oauthMessages ]
 
             return { status: false, messages, categories, entries }
         }
 
-        const { messages, categories, entries } = await McpServerValidator.#runPipeline( { endpoint, client, serverInfo, timeout } )
+        const { messages, categories, entries } = await McpServerValidator.#runPipeline( { endpoint, client, serverInfo, timeout, oauthEntries, supportsOAuth } )
 
         await McpConnector.disconnect( { client } )
 
-        const allMessages = [ ...connectMessages, ...messages ]
+        const allMessages = [ ...connectMessages, ...oauthMessages, ...messages ]
         const status = allMessages.length === 0
 
         return { status, messages: allMessages, categories, entries }
@@ -65,7 +68,7 @@ class McpServerValidator {
     }
 
 
-    static async #runPipeline( { endpoint, client, serverInfo, timeout } ) {
+    static async #runPipeline( { endpoint, client, serverInfo, timeout, oauthEntries, supportsOAuth } ) {
         const allMessages = []
 
         const { messages: discoverMessages, tools, resources, prompts, capabilities } = await McpConnector.discover( { client } )
@@ -92,7 +95,9 @@ class McpServerValidator {
             restrictedCalls,
             paymentOptions,
             validPaymentOptions,
-            latency
+            latency,
+            oauthEntries,
+            supportsOAuth
         } )
 
         return { messages: allMessages, categories, entries }

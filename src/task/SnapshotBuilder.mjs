@@ -1,3 +1,6 @@
+import { EMPTY_OAUTH_ENTRIES } from './OAuthProber.mjs'
+
+
 const EMPTY_CATEGORIES = {
     isReachable: false,
     supportsMcp: false,
@@ -10,23 +13,30 @@ const EMPTY_CATEGORIES = {
     supportsEvm: false,
     supportsSolana: false,
     supportsTasks: false,
-    supportsMcpApps: false
+    supportsMcpApps: false,
+    supportsOAuth: false,
+    hasProtectedResourceMetadata: false,
+    hasAuthServerMetadata: false,
+    supportsPkce: false,
+    hasDynamicRegistration: false,
+    hasValidOAuthConfig: false
 }
 
 
 class SnapshotBuilder {
 
 
-    static build( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
-        const { categories } = SnapshotBuilder.#buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions } )
-        const { entries } = SnapshotBuilder.#buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } )
+    static build( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries, supportsOAuth } ) {
+        const { categories } = SnapshotBuilder.#buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, oauthEntries, supportsOAuth } )
+        const { entries } = SnapshotBuilder.#buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } )
 
         return { categories, entries }
     }
 
 
-    static buildEmpty( { endpoint } ) {
-        const categories = { ...EMPTY_CATEGORIES }
+    static buildEmpty( { endpoint, oauthEntries = null, supportsOAuth = false } ) {
+        const oauthCategories = SnapshotBuilder.#buildOAuthCategories( { oauthEntries, supportsOAuth } )
+        const categories = { ...EMPTY_CATEGORIES, ...oauthCategories }
 
         const entries = {
             endpoint,
@@ -47,6 +57,7 @@ class SnapshotBuilder {
                 schemes: [],
                 perTool: {}
             },
+            oauth: oauthEntries || { ...EMPTY_OAUTH_ENTRIES },
             latency: {
                 ping: null,
                 listTools: null
@@ -58,12 +69,14 @@ class SnapshotBuilder {
     }
 
 
-    static #buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions } ) {
+    static #buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, oauthEntries, supportsOAuth } ) {
         const supportsX402 = restrictedCalls.length > 0
         const hasValidPaymentRequirements = validPaymentOptions.length > 0
         const { hasExact: supportsExactScheme } = SnapshotBuilder.#detectScheme( { paymentOptions: validPaymentOptions, scheme: 'exact' } )
         const { hasNetwork: supportsEvm } = SnapshotBuilder.#detectNetworkPrefix( { paymentOptions: validPaymentOptions, prefix: 'eip155:' } )
         const { hasNetwork: supportsSolana } = SnapshotBuilder.#detectNetworkPrefix( { paymentOptions: validPaymentOptions, prefix: 'solana:' } )
+
+        const oauthCategories = SnapshotBuilder.#buildOAuthCategories( { oauthEntries, supportsOAuth } )
 
         const categories = {
             isReachable: true,
@@ -77,14 +90,15 @@ class SnapshotBuilder {
             supportsEvm,
             supportsSolana,
             supportsTasks: partialCategories['supportsTasks'],
-            supportsMcpApps: partialCategories['supportsMcpApps']
+            supportsMcpApps: partialCategories['supportsMcpApps'],
+            ...oauthCategories
         }
 
         return { categories }
     }
 
 
-    static #buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency } ) {
+    static #buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } ) {
         const { serverName, serverVersion, serverDescription, protocolVersion, instructions } = SnapshotBuilder.#extractServerInfo( { serverInfo } )
         const { networks } = SnapshotBuilder.#extractUniqueNetworks( { paymentOptions: validPaymentOptions } )
         const { schemes } = SnapshotBuilder.#extractUniqueSchemes( { paymentOptions: validPaymentOptions } )
@@ -111,11 +125,41 @@ class SnapshotBuilder {
                 schemes,
                 perTool
             },
+            oauth: oauthEntries || { ...EMPTY_OAUTH_ENTRIES },
             latency,
             timestamp: new Date().toISOString()
         }
 
         return { entries }
+    }
+
+
+    static #buildOAuthCategories( { oauthEntries, supportsOAuth } ) {
+        if( !oauthEntries || !supportsOAuth ) {
+            return {
+                supportsOAuth: false,
+                hasProtectedResourceMetadata: false,
+                hasAuthServerMetadata: false,
+                supportsPkce: false,
+                hasDynamicRegistration: false,
+                hasValidOAuthConfig: false
+            }
+        }
+
+        const hasProtectedResourceMetadata = oauthEntries['protectedResourceMetadataUrl'] !== null
+        const hasAuthServerMetadata = oauthEntries['authorizationEndpoint'] !== null
+        const supportsPkce = Array.isArray( oauthEntries['pkceMethodsSupported'] ) && oauthEntries['pkceMethodsSupported'].includes( 'S256' )
+        const hasDynamicRegistration = oauthEntries['registrationEndpoint'] !== null || oauthEntries['clientIdMetadataDocumentSupported'] === true
+        const hasValidOAuthConfig = hasProtectedResourceMetadata && hasAuthServerMetadata && supportsPkce
+
+        return {
+            supportsOAuth: true,
+            hasProtectedResourceMetadata,
+            hasAuthServerMetadata,
+            supportsPkce,
+            hasDynamicRegistration,
+            hasValidOAuthConfig
+        }
     }
 
 

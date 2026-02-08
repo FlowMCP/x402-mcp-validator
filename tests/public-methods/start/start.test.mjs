@@ -7,6 +7,7 @@ import {
     MOCK_PROMPTS,
     MOCK_CAPABILITIES,
     VALID_PAYMENT_REQUIRED,
+    MOCK_OAUTH_ENTRIES_EMPTY,
     MOCK_LATENCY,
     EXPECTED_CATEGORY_KEYS,
     EXPECTED_ENTRY_KEYS,
@@ -34,6 +35,10 @@ const mockConnector = {
     disconnect: jest.fn()
 }
 
+const mockOAuthProber = {
+    probe: jest.fn()
+}
+
 jest.unstable_mockModule( '../../../src/task/McpConnector.mjs', () => ( {
     McpConnector: {
         connect: mockConnector['connect'],
@@ -43,6 +48,13 @@ jest.unstable_mockModule( '../../../src/task/McpConnector.mjs', () => ( {
     }
 } ) )
 
+jest.unstable_mockModule( '../../../src/task/OAuthProber.mjs', () => ( {
+    OAuthProber: {
+        probe: mockOAuthProber['probe']
+    },
+    EMPTY_OAUTH_ENTRIES: MOCK_OAUTH_ENTRIES_EMPTY
+} ) )
+
 const { McpServerValidator } = await import( '../../../src/McpServerValidator.mjs' )
 
 
@@ -50,6 +62,14 @@ describe( 'McpServerValidator.start', () => {
 
     beforeEach( () => {
         jest.clearAllMocks()
+
+        mockOAuthProber['probe'].mockResolvedValue( {
+            messages: [],
+            supportsOAuth: false,
+            protectedResource: null,
+            authServer: null,
+            oauthEntries: { ...MOCK_OAUTH_ENTRIES_EMPTY }
+        } )
     } )
 
 
@@ -147,7 +167,7 @@ describe( 'McpServerValidator.start', () => {
         } )
 
 
-        test( 'returns all 12 category keys', async () => {
+        test( 'returns all 18 category keys', async () => {
             const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const categoryKeys = Object.keys( categories )
@@ -157,11 +177,11 @@ describe( 'McpServerValidator.start', () => {
                     expect( categoryKeys ).toContain( key )
                 } )
 
-            expect( categoryKeys.length ).toBe( 12 )
+            expect( categoryKeys.length ).toBe( 18 )
         } )
 
 
-        test( 'returns all 13 entry keys', async () => {
+        test( 'returns all 14 entry keys', async () => {
             const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const entryKeys = Object.keys( entries )
@@ -171,7 +191,7 @@ describe( 'McpServerValidator.start', () => {
                     expect( entryKeys ).toContain( key )
                 } )
 
-            expect( entryKeys.length ).toBe( 13 )
+            expect( entryKeys.length ).toBe( 14 )
         } )
 
 
