@@ -187,6 +187,104 @@ console.log( `Tools removed: ${diff['tools']['removed'].length}` )
 | latency | object | `ping` and `listTools` in milliseconds |
 | timestamp | string | ISO 8601 timestamp of validation |
 
+## Validation Codes
+
+### VAL — Input Validation
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| VAL-001 | ERROR | endpoint: Missing value |
+| VAL-002 | ERROR | endpoint: Must be a string |
+| VAL-003 | ERROR | endpoint: Must not be empty |
+| VAL-004 | ERROR | endpoint: Must be a valid URL |
+| VAL-005 | ERROR | timeout: Must be a number |
+| VAL-006 | ERROR | timeout: Must be greater than 0 |
+| VAL-010 | ERROR | before: Missing value |
+| VAL-011 | ERROR | before: Must be an object |
+| VAL-012 | ERROR | before: Missing categories or entries |
+| VAL-013 | ERROR | after: Missing value |
+| VAL-014 | ERROR | after: Must be an object |
+| VAL-015 | ERROR | after: Missing categories or entries |
+
+### CON — MCP Connection
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| CON-001 | ERROR | endpoint: Server is not reachable |
+| CON-004 | ERROR | mcp: Initialize handshake failed |
+| CON-008 | WARNING | tools/list: Request failed |
+| CON-009 | WARNING | tools/list: Invalid response format |
+| CON-010 | INFO | resources/list: Request failed |
+| CON-011 | INFO | prompts/list: Request failed |
+
+### PAY — Payment Validation
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| PAY-001 | ERROR | restrictedCalls: PaymentRequired data is missing |
+| PAY-002 | ERROR | restrictedCalls: PaymentRequired is not an object |
+| PAY-010 | ERROR | x402Version: Missing required field |
+| PAY-011 | ERROR | x402Version: Must be a number |
+| PAY-012 | ERROR | x402Version: Expected 2 |
+| PAY-020 | ERROR | resource: Must be a string or object |
+| PAY-021 | ERROR | resource: Must not be empty / resource.url: Missing value |
+| PAY-022 | ERROR | resource.url: Must be a string |
+| PAY-023 | ERROR | resource.url: Invalid URL format |
+| PAY-024 | ERROR | resource: Unknown field |
+| PAY-030 | ERROR | accepts: Missing required field |
+| PAY-031 | ERROR | accepts: Must be an array |
+| PAY-032 | ERROR | accepts: Is empty array |
+| PAY-040 | ERROR | scheme: Missing value |
+| PAY-041 | ERROR | scheme: Must be a string |
+| PAY-042 | ERROR | scheme: Invalid value |
+| PAY-050 | ERROR | network: Missing value |
+| PAY-051 | ERROR | network: Must be a string |
+| PAY-052 | ERROR | network: Unknown prefix |
+| PAY-053 | ERROR | network: Missing chain ID after prefix |
+| PAY-060 | ERROR | maxAmountRequired: Missing value |
+| PAY-061 | ERROR | maxAmountRequired: Must be a string |
+| PAY-062 | ERROR | maxAmountRequired: Must be a numeric string |
+| PAY-063 | ERROR | maxAmountRequired: Must be positive |
+| PAY-070 | ERROR | asset: Missing value |
+| PAY-071 | ERROR | asset: Must be a string |
+| PAY-072 | ERROR | asset: Invalid EVM address format |
+| PAY-080 | ERROR | payTo: Missing value |
+| PAY-081 | ERROR | payTo: Must be a string |
+| PAY-082 | ERROR | payTo: Invalid EVM address format |
+| PAY-083 | WARNING | payTo: Not checksummed |
+| PAY-090 | ERROR | maxTimeoutSeconds: Missing value |
+| PAY-091 | ERROR | maxTimeoutSeconds: Must be a number |
+| PAY-092 | ERROR | maxTimeoutSeconds: Must be greater than 0 |
+| PAY-100 | INFO | extra: Must be an object |
+| PAY-101 | INFO | extra.name: Missing (recommended for EVM) |
+| PAY-102 | INFO | extra.version: Missing (recommended for EIP-3009) |
+
+### PRB — Probe
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| PRB-004 | INFO | probe: Unexpected exception |
+| PRB-005 | INFO | probe: No tools available to probe |
+
+### AUTH — OAuth
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| AUTH-002 | INFO | Authorization Server Metadata not found or incomplete |
+| AUTH-003 | INFO | PKCE S256 not supported (MCP Spec MUST) |
+| AUTH-004 | INFO | Missing authorization_servers in Protected Resource Metadata |
+| AUTH-005 | INFO | No client registration mechanism available |
+| AUTH-010 | INFO | Server requires authentication |
+| AUTH-011 | INFO | Scopes found |
+
+### CMP — Comparison
+
+| Code | Severity | Description |
+|------|----------|-------------|
+| CMP-001 | WARNING | Snapshots are from different servers |
+| CMP-002 | WARNING | Before snapshot has no timestamp |
+| CMP-003 | WARNING | After snapshot is older than before |
+
 ## License
 
 MIT
