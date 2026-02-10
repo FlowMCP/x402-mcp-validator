@@ -14,6 +14,17 @@ const EMPTY_CATEGORIES = {
     supportsSolana: false,
     supportsTasks: false,
     supportsMcpApps: false,
+    supportsLogging: false,
+    supportsCompletions: false,
+    supportsResourceSubscription: false,
+    supportsResourceListChanged: false,
+    supportsPromptListChanged: false,
+    supportsToolListChanged: false,
+    supportsTaskList: false,
+    supportsTaskCancel: false,
+    supportsTaskAugmentedToolCall: false,
+    hasExperimentalCapabilities: false,
+    specVersion: null,
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
     hasAuthServerMetadata: false,
@@ -28,7 +39,7 @@ class SnapshotBuilder {
 
     static build( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries, supportsOAuth } ) {
         const { categories } = SnapshotBuilder.#buildCategories( { partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, oauthEntries, supportsOAuth } )
-        const { entries } = SnapshotBuilder.#buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } )
+        const { entries } = SnapshotBuilder.#buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } )
 
         return { categories, entries }
     }
@@ -49,6 +60,9 @@ class SnapshotBuilder {
             tools: [],
             resources: [],
             prompts: [],
+            specVersion: null,
+            experimentalCapabilities: null,
+            taskCapabilities: null,
             x402: {
                 version: null,
                 restrictedCalls: [],
@@ -91,6 +105,17 @@ class SnapshotBuilder {
             supportsSolana,
             supportsTasks: partialCategories['supportsTasks'],
             supportsMcpApps: partialCategories['supportsMcpApps'],
+            supportsLogging: partialCategories['supportsLogging'],
+            supportsCompletions: partialCategories['supportsCompletions'],
+            supportsResourceSubscription: partialCategories['supportsResourceSubscription'],
+            supportsResourceListChanged: partialCategories['supportsResourceListChanged'],
+            supportsPromptListChanged: partialCategories['supportsPromptListChanged'],
+            supportsToolListChanged: partialCategories['supportsToolListChanged'],
+            supportsTaskList: partialCategories['supportsTaskList'],
+            supportsTaskCancel: partialCategories['supportsTaskCancel'],
+            supportsTaskAugmentedToolCall: partialCategories['supportsTaskAugmentedToolCall'],
+            hasExperimentalCapabilities: partialCategories['hasExperimentalCapabilities'],
+            specVersion: partialCategories['specVersion'],
             ...oauthCategories
         }
 
@@ -98,13 +123,16 @@ class SnapshotBuilder {
     }
 
 
-    static #buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } ) {
+    static #buildEntries( { endpoint, serverInfo, tools, resources, prompts, capabilities, partialCategories, restrictedCalls, paymentOptions, validPaymentOptions, latency, oauthEntries } ) {
         const { serverName, serverVersion, serverDescription, protocolVersion, instructions } = SnapshotBuilder.#extractServerInfo( { serverInfo } )
         const { networks } = SnapshotBuilder.#extractUniqueNetworks( { paymentOptions: validPaymentOptions } )
         const { schemes } = SnapshotBuilder.#extractUniqueSchemes( { paymentOptions: validPaymentOptions } )
         const { perTool } = SnapshotBuilder.#buildPerToolPayments( { restrictedCalls } )
+        const { experimentalCapabilities } = SnapshotBuilder.#extractExperimentalKeys( { capabilities } )
+        const { taskCapabilities } = SnapshotBuilder.#extractTaskCapabilities( { capabilities } )
 
         const version = restrictedCalls.length > 0 ? 2 : null
+        const specVersion = partialCategories['specVersion'] || null
 
         const entries = {
             endpoint,
@@ -117,6 +145,9 @@ class SnapshotBuilder {
             tools,
             resources,
             prompts,
+            specVersion,
+            experimentalCapabilities,
+            taskCapabilities,
             x402: {
                 version,
                 restrictedCalls,
@@ -275,6 +306,44 @@ class SnapshotBuilder {
             .some( ( option ) => typeof option['network'] === 'string' && option['network'].startsWith( prefix ) )
 
         return { hasNetwork }
+    }
+
+
+    static #extractExperimentalKeys( { capabilities } ) {
+        if( !capabilities || typeof capabilities !== 'object' ) {
+            return { experimentalCapabilities: null }
+        }
+
+        const experimental = capabilities['experimental']
+
+        if( !experimental || typeof experimental !== 'object' ) {
+            return { experimentalCapabilities: null }
+        }
+
+        const experimentalCapabilities = Object.keys( experimental )
+
+        return { experimentalCapabilities }
+    }
+
+
+    static #extractTaskCapabilities( { capabilities } ) {
+        if( !capabilities || typeof capabilities !== 'object' ) {
+            return { taskCapabilities: null }
+        }
+
+        const tasks = capabilities['tasks']
+
+        if( !tasks || typeof tasks !== 'object' ) {
+            return { taskCapabilities: null }
+        }
+
+        const list = tasks['list'] === true
+        const cancel = tasks['cancel'] === true
+        const augmentedToolCall = tasks['requests']?.['tools']?.['call'] === true
+
+        const taskCapabilities = { list, cancel, augmentedToolCall }
+
+        return { taskCapabilities }
     }
 }
 

@@ -64,6 +64,47 @@ const MOCK_CAPABILITIES_WITH_TASKS = {
     tasks: { supported: true }
 }
 
+const MOCK_CAPABILITIES_WITH_LOGGING_COMPLETIONS = {
+    tools: {},
+    logging: {},
+    completions: {}
+}
+
+const MOCK_CAPABILITIES_WITH_EXPERIMENTAL = {
+    tools: {},
+    experimental: {
+        customFeatureA: true,
+        customFeatureB: { enabled: true }
+    }
+}
+
+const MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES = {
+    tools: {},
+    tasks: {
+        list: true,
+        cancel: true,
+        requests: {
+            tools: {
+                call: true
+            }
+        }
+    }
+}
+
+const MOCK_CAPABILITIES_WITH_RESOURCE_SUB_PROPERTIES = {
+    tools: {},
+    resources: {
+        subscribe: true,
+        listChanged: true
+    },
+    prompts: {
+        listChanged: true
+    },
+    tools: {
+        listChanged: true
+    }
+}
+
 
 // --- Valid Payment Required ---
 
@@ -237,7 +278,7 @@ const VALID_PAYMENT_OPTIONS_MULTI = [
 ]
 
 
-// --- Expected Category Keys (18) ---
+// --- Expected Category Keys (29) ---
 
 const EXPECTED_CATEGORY_KEYS = [
     'isReachable',
@@ -252,6 +293,17 @@ const EXPECTED_CATEGORY_KEYS = [
     'supportsSolana',
     'supportsTasks',
     'supportsMcpApps',
+    'supportsLogging',
+    'supportsCompletions',
+    'supportsResourceSubscription',
+    'supportsResourceListChanged',
+    'supportsPromptListChanged',
+    'supportsToolListChanged',
+    'supportsTaskList',
+    'supportsTaskCancel',
+    'supportsTaskAugmentedToolCall',
+    'hasExperimentalCapabilities',
+    'specVersion',
     'supportsOAuth',
     'hasProtectedResourceMetadata',
     'hasAuthServerMetadata',
@@ -261,7 +313,7 @@ const EXPECTED_CATEGORY_KEYS = [
 ]
 
 
-// --- Expected Entry Keys (14) ---
+// --- Expected Entry Keys (17) ---
 
 const EXPECTED_ENTRY_KEYS = [
     'endpoint',
@@ -274,6 +326,9 @@ const EXPECTED_ENTRY_KEYS = [
     'tools',
     'resources',
     'prompts',
+    'specVersion',
+    'experimentalCapabilities',
+    'taskCapabilities',
     'x402',
     'oauth',
     'latency',
@@ -296,6 +351,17 @@ const FULL_VALID_CATEGORIES = {
     supportsSolana: false,
     supportsTasks: false,
     supportsMcpApps: false,
+    supportsLogging: false,
+    supportsCompletions: false,
+    supportsResourceSubscription: false,
+    supportsResourceListChanged: false,
+    supportsPromptListChanged: false,
+    supportsToolListChanged: false,
+    supportsTaskList: false,
+    supportsTaskCancel: false,
+    supportsTaskAugmentedToolCall: false,
+    hasExperimentalCapabilities: false,
+    specVersion: '2025-03-26',
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
     hasAuthServerMetadata: false,
@@ -320,6 +386,17 @@ const EMPTY_CATEGORIES = {
     supportsSolana: false,
     supportsTasks: false,
     supportsMcpApps: false,
+    supportsLogging: false,
+    supportsCompletions: false,
+    supportsResourceSubscription: false,
+    supportsResourceListChanged: false,
+    supportsPromptListChanged: false,
+    supportsToolListChanged: false,
+    supportsTaskList: false,
+    supportsTaskCancel: false,
+    supportsTaskAugmentedToolCall: false,
+    hasExperimentalCapabilities: false,
+    specVersion: null,
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
     hasAuthServerMetadata: false,
@@ -382,6 +459,10 @@ export {
     MOCK_PROMPTS,
     MOCK_CAPABILITIES,
     MOCK_CAPABILITIES_WITH_TASKS,
+    MOCK_CAPABILITIES_WITH_LOGGING_COMPLETIONS,
+    MOCK_CAPABILITIES_WITH_EXPERIMENTAL,
+    MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES,
+    MOCK_CAPABILITIES_WITH_RESOURCE_SUB_PROPERTIES,
     VALID_PAYMENT_REQUIRED,
     VALID_PAYMENT_REQUIRED_MULTI_NETWORK,
     INVALID_PAYMENT_MISSING_VERSION,

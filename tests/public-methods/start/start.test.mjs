@@ -128,7 +128,11 @@ describe( 'McpServerValidator.start', () => {
 
             EXPECTED_CATEGORY_KEYS
                 .forEach( ( key ) => {
-                    expect( categories[key] ).toBe( false )
+                    if( key === 'specVersion' ) {
+                        expect( categories[key] ).toBeNull()
+                    } else {
+                        expect( categories[key] ).toBe( false )
+                    }
                 } )
 
             expect( entries['endpoint'] ).toBe( TEST_ENDPOINT )
@@ -167,7 +171,7 @@ describe( 'McpServerValidator.start', () => {
         } )
 
 
-        test( 'returns all 18 category keys', async () => {
+        test( 'returns all 29 category keys', async () => {
             const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const categoryKeys = Object.keys( categories )
@@ -177,11 +181,11 @@ describe( 'McpServerValidator.start', () => {
                     expect( categoryKeys ).toContain( key )
                 } )
 
-            expect( categoryKeys.length ).toBe( 18 )
+            expect( categoryKeys.length ).toBe( 29 )
         } )
 
 
-        test( 'returns all 14 entry keys', async () => {
+        test( 'returns all 17 entry keys', async () => {
             const { entries } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const entryKeys = Object.keys( entries )
@@ -191,7 +195,7 @@ describe( 'McpServerValidator.start', () => {
                     expect( entryKeys ).toContain( key )
                 } )
 
-            expect( entryKeys.length ).toBe( 14 )
+            expect( entryKeys.length ).toBe( 17 )
         } )
 
 

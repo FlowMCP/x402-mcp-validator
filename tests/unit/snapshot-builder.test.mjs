@@ -6,6 +6,8 @@ import {
     MOCK_RESOURCES,
     MOCK_PROMPTS,
     MOCK_CAPABILITIES,
+    MOCK_CAPABILITIES_WITH_EXPERIMENTAL,
+    MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES,
     MOCK_RESTRICTED_CALLS,
     VALID_PAYMENT_OPTIONS,
     MOCK_OAUTH_ENTRIES_EMPTY,
@@ -30,7 +32,18 @@ describe( 'SnapshotBuilder', () => {
             hasResources: true,
             hasPrompts: true,
             supportsTasks: false,
-            supportsMcpApps: false
+            supportsMcpApps: false,
+            supportsLogging: false,
+            supportsCompletions: false,
+            supportsResourceSubscription: false,
+            supportsResourceListChanged: false,
+            supportsPromptListChanged: false,
+            supportsToolListChanged: false,
+            supportsTaskList: false,
+            supportsTaskCancel: false,
+            supportsTaskAugmentedToolCall: false,
+            hasExperimentalCapabilities: false,
+            specVersion: '2025-03-26'
         },
         restrictedCalls: MOCK_RESTRICTED_CALLS,
         paymentOptions: VALID_PAYMENT_OPTIONS,
@@ -42,7 +55,7 @@ describe( 'SnapshotBuilder', () => {
 
 
     describe( 'build', () => {
-        test( 'returns all 18 category keys', () => {
+        test( 'returns all 29 category keys', () => {
             const { categories } = SnapshotBuilder.build( buildArgs )
 
             EXPECTED_CATEGORY_KEYS
@@ -52,7 +65,7 @@ describe( 'SnapshotBuilder', () => {
         } )
 
 
-        test( 'returns all 14 entry keys', () => {
+        test( 'returns all 17 entry keys', () => {
             const { entries } = SnapshotBuilder.build( buildArgs )
 
             EXPECTED_ENTRY_KEYS
@@ -158,16 +171,80 @@ describe( 'SnapshotBuilder', () => {
             expect( categories['hasDynamicRegistration'] ).toBe( true )
             expect( categories['hasValidOAuthConfig'] ).toBe( true )
         } )
+
+
+        test( 'includes specVersion entry from partialCategories', () => {
+            const { entries } = SnapshotBuilder.build( buildArgs )
+
+            expect( entries['specVersion'] ).toBe( '2025-03-26' )
+        } )
+
+
+        test( 'sets experimentalCapabilities to null when no experimental', () => {
+            const { entries } = SnapshotBuilder.build( buildArgs )
+
+            expect( entries['experimentalCapabilities'] ).toBeNull()
+        } )
+
+
+        test( 'extracts experimental capability keys', () => {
+            const argsWithExperimental = {
+                ...buildArgs,
+                capabilities: MOCK_CAPABILITIES_WITH_EXPERIMENTAL,
+                partialCategories: {
+                    ...buildArgs['partialCategories'],
+                    hasExperimentalCapabilities: true
+                }
+            }
+
+            const { entries } = SnapshotBuilder.build( argsWithExperimental )
+
+            expect( entries['experimentalCapabilities'] ).toEqual( [ 'customFeatureA', 'customFeatureB' ] )
+        } )
+
+
+        test( 'sets taskCapabilities to null when no task capabilities', () => {
+            const { entries } = SnapshotBuilder.build( buildArgs )
+
+            expect( entries['taskCapabilities'] ).toBeNull()
+        } )
+
+
+        test( 'extracts task sub-capabilities', () => {
+            const argsWithTasks = {
+                ...buildArgs,
+                capabilities: MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES,
+                partialCategories: {
+                    ...buildArgs['partialCategories'],
+                    supportsTasks: true,
+                    supportsTaskList: true,
+                    supportsTaskCancel: true,
+                    supportsTaskAugmentedToolCall: true
+                }
+            }
+
+            const { entries } = SnapshotBuilder.build( argsWithTasks )
+
+            expect( entries['taskCapabilities'] ).toEqual( {
+                list: true,
+                cancel: true,
+                augmentedToolCall: true
+            } )
+        } )
     } )
 
 
     describe( 'buildEmpty', () => {
-        test( 'returns all categories as false', () => {
+        test( 'returns all categories with expected defaults', () => {
             const { categories } = SnapshotBuilder.buildEmpty( { endpoint: TEST_ENDPOINT } )
 
             EXPECTED_CATEGORY_KEYS
                 .forEach( ( key ) => {
-                    expect( categories[ key ] ).toBe( false )
+                    if( key === 'specVersion' ) {
+                        expect( categories[key] ).toBeNull()
+                    } else {
+                        expect( categories[key] ).toBe( false )
+                    }
                 } )
         } )
 
@@ -180,6 +257,15 @@ describe( 'SnapshotBuilder', () => {
             expect( entries.tools ).toEqual( [] )
             expect( entries.x402.restrictedCalls ).toEqual( [] )
             expect( entries.oauth.issuer ).toBeNull()
+        } )
+
+
+        test( 'returns null for new entries in empty snapshot', () => {
+            const { entries } = SnapshotBuilder.buildEmpty( { endpoint: TEST_ENDPOINT } )
+
+            expect( entries['specVersion'] ).toBeNull()
+            expect( entries['experimentalCapabilities'] ).toBeNull()
+            expect( entries['taskCapabilities'] ).toBeNull()
         } )
     } )
 } )
