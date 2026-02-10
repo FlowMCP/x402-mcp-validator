@@ -10,6 +10,8 @@ import {
     MOCK_CAPABILITIES_WITH_EXPERIMENTAL,
     MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES,
     MOCK_CAPABILITIES_WITH_RESOURCE_SUB_PROPERTIES,
+    MOCK_CAPABILITIES_WITH_SAMPLING,
+    MOCK_CAPABILITIES_WITH_ELICITATION,
     MOCK_SERVER_INFO
 } from '../helpers/config.mjs'
 
@@ -447,5 +449,61 @@ describe( 'CapabilityClassifier', () => {
             } )
 
         expect( categories.specVersion ).toBeNull()
+    } )
+
+
+    test( 'detects sampling capability', () => {
+        const { categories } = CapabilityClassifier
+            .classify( {
+                serverInfo: MOCK_SERVER_INFO,
+                tools: [],
+                resources: [],
+                prompts: [],
+                capabilities: MOCK_CAPABILITIES_WITH_SAMPLING
+            } )
+
+        expect( categories.supportsSampling ).toBe( true )
+    } )
+
+
+    test( 'returns false for sampling when absent', () => {
+        const { categories } = CapabilityClassifier
+            .classify( {
+                serverInfo: MOCK_SERVER_INFO,
+                tools: [],
+                resources: [],
+                prompts: [],
+                capabilities: MOCK_CAPABILITIES
+            } )
+
+        expect( categories.supportsSampling ).toBe( false )
+    } )
+
+
+    test( 'detects elicitation capability', () => {
+        const { categories } = CapabilityClassifier
+            .classify( {
+                serverInfo: MOCK_SERVER_INFO,
+                tools: [],
+                resources: [],
+                prompts: [],
+                capabilities: MOCK_CAPABILITIES_WITH_ELICITATION
+            } )
+
+        expect( categories.supportsElicitation ).toBe( true )
+    } )
+
+
+    test( 'returns false for elicitation when absent', () => {
+        const { categories } = CapabilityClassifier
+            .classify( {
+                serverInfo: MOCK_SERVER_INFO,
+                tools: [],
+                resources: [],
+                prompts: [],
+                capabilities: MOCK_CAPABILITIES
+            } )
+
+        expect( categories.supportsElicitation ).toBe( false )
     } )
 } )

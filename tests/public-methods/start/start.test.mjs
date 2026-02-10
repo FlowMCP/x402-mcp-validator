@@ -171,7 +171,7 @@ describe( 'McpServerValidator.start', () => {
         } )
 
 
-        test( 'returns all 29 category keys', async () => {
+        test( 'returns all 31 category keys', async () => {
             const { categories } = await McpServerValidator.start( { endpoint: TEST_ENDPOINT } )
 
             const categoryKeys = Object.keys( categories )
@@ -181,7 +181,7 @@ describe( 'McpServerValidator.start', () => {
                     expect( categoryKeys ).toContain( key )
                 } )
 
-            expect( categoryKeys.length ).toBe( 29 )
+            expect( categoryKeys.length ).toBe( 31 )
         } )
 
 

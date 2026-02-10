@@ -17,6 +17,8 @@ class CapabilityClassifier {
         const { detected: supportsTaskCancel } = CapabilityClassifier.#detectSubProperty( { capabilities, key: 'tasks', subKey: 'cancel' } )
         const { detected: supportsTaskAugmentedToolCall } = CapabilityClassifier.#detectDeepProperty( { capabilities, path: [ 'tasks', 'requests', 'tools', 'call' ] } )
         const { detected: hasExperimentalCapabilities } = CapabilityClassifier.#detectCapability( { capabilities, key: 'experimental' } )
+        const { detected: supportsSampling } = CapabilityClassifier.#detectCapability( { capabilities, key: 'sampling' } )
+        const { detected: supportsElicitation } = CapabilityClassifier.#detectCapability( { capabilities, key: 'elicitation' } )
         const { specVersion } = CapabilityClassifier.#classifySpecVersion( { serverInfo } )
 
         const categories = {
@@ -35,6 +37,8 @@ class CapabilityClassifier {
             supportsTaskCancel,
             supportsTaskAugmentedToolCall,
             hasExperimentalCapabilities,
+            supportsSampling,
+            supportsElicitation,
             specVersion
         }
 
@@ -112,7 +116,7 @@ class CapabilityClassifier {
             return { specVersion: null }
         }
 
-        const knownVersions = [ '2024-11-05', '2025-03-26' ]
+        const knownVersions = [ '2024-11-05', '2025-03-26', '2025-06-18', '2025-11-25' ]
         const specVersion = knownVersions.includes( version ) ? version : 'unknown'
 
         return { specVersion }

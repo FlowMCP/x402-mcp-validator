@@ -43,6 +43,8 @@ describe( 'SnapshotBuilder', () => {
             supportsTaskCancel: false,
             supportsTaskAugmentedToolCall: false,
             hasExperimentalCapabilities: false,
+            supportsSampling: false,
+            supportsElicitation: false,
             specVersion: '2025-03-26'
         },
         restrictedCalls: MOCK_RESTRICTED_CALLS,
@@ -55,7 +57,7 @@ describe( 'SnapshotBuilder', () => {
 
 
     describe( 'build', () => {
-        test( 'returns all 29 category keys', () => {
+        test( 'returns all 31 category keys', () => {
             const { categories } = SnapshotBuilder.build( buildArgs )
 
             EXPECTED_CATEGORY_KEYS

@@ -105,6 +105,16 @@ const MOCK_CAPABILITIES_WITH_RESOURCE_SUB_PROPERTIES = {
     }
 }
 
+const MOCK_CAPABILITIES_WITH_SAMPLING = {
+    tools: {},
+    sampling: {}
+}
+
+const MOCK_CAPABILITIES_WITH_ELICITATION = {
+    tools: {},
+    elicitation: {}
+}
+
 
 // --- Valid Payment Required ---
 
@@ -278,7 +288,7 @@ const VALID_PAYMENT_OPTIONS_MULTI = [
 ]
 
 
-// --- Expected Category Keys (29) ---
+// --- Expected Category Keys (31) ---
 
 const EXPECTED_CATEGORY_KEYS = [
     'isReachable',
@@ -303,6 +313,8 @@ const EXPECTED_CATEGORY_KEYS = [
     'supportsTaskCancel',
     'supportsTaskAugmentedToolCall',
     'hasExperimentalCapabilities',
+    'supportsSampling',
+    'supportsElicitation',
     'specVersion',
     'supportsOAuth',
     'hasProtectedResourceMetadata',
@@ -361,6 +373,8 @@ const FULL_VALID_CATEGORIES = {
     supportsTaskCancel: false,
     supportsTaskAugmentedToolCall: false,
     hasExperimentalCapabilities: false,
+    supportsSampling: false,
+    supportsElicitation: false,
     specVersion: '2025-03-26',
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
@@ -396,6 +410,8 @@ const EMPTY_CATEGORIES = {
     supportsTaskCancel: false,
     supportsTaskAugmentedToolCall: false,
     hasExperimentalCapabilities: false,
+    supportsSampling: false,
+    supportsElicitation: false,
     specVersion: null,
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
@@ -463,6 +479,8 @@ export {
     MOCK_CAPABILITIES_WITH_EXPERIMENTAL,
     MOCK_CAPABILITIES_WITH_TASK_SUB_CAPABILITIES,
     MOCK_CAPABILITIES_WITH_RESOURCE_SUB_PROPERTIES,
+    MOCK_CAPABILITIES_WITH_SAMPLING,
+    MOCK_CAPABILITIES_WITH_ELICITATION,
     VALID_PAYMENT_REQUIRED,
     VALID_PAYMENT_REQUIRED_MULTI_NETWORK,
     INVALID_PAYMENT_MISSING_VERSION,

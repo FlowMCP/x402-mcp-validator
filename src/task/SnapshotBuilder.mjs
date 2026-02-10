@@ -24,6 +24,8 @@ const EMPTY_CATEGORIES = {
     supportsTaskCancel: false,
     supportsTaskAugmentedToolCall: false,
     hasExperimentalCapabilities: false,
+    supportsSampling: false,
+    supportsElicitation: false,
     specVersion: null,
     supportsOAuth: false,
     hasProtectedResourceMetadata: false,
@@ -115,6 +117,8 @@ class SnapshotBuilder {
             supportsTaskCancel: partialCategories['supportsTaskCancel'],
             supportsTaskAugmentedToolCall: partialCategories['supportsTaskAugmentedToolCall'],
             hasExperimentalCapabilities: partialCategories['hasExperimentalCapabilities'],
+            supportsSampling: partialCategories['supportsSampling'] || false,
+            supportsElicitation: partialCategories['supportsElicitation'] || false,
             specVersion: partialCategories['specVersion'],
             ...oauthCategories
         }
@@ -131,7 +135,9 @@ class SnapshotBuilder {
         const { experimentalCapabilities } = SnapshotBuilder.#extractExperimentalKeys( { capabilities } )
         const { taskCapabilities } = SnapshotBuilder.#extractTaskCapabilities( { capabilities } )
 
-        const version = restrictedCalls.length > 0 ? 2 : null
+        const version = restrictedCalls.length > 0 && restrictedCalls[ 0 ][ 'paymentRequired' ] && typeof restrictedCalls[ 0 ][ 'paymentRequired' ][ 'x402Version' ] === 'number'
+            ? restrictedCalls[ 0 ][ 'paymentRequired' ][ 'x402Version' ]
+            : null
         const specVersion = partialCategories['specVersion'] || null
 
         const entries = {
